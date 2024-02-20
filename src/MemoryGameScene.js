@@ -1,20 +1,5 @@
 let level = [[1,0,3],[2,4,1],[3,4,2]]
 
-const result = [];
-  for (let i = 0; i < 3; i++) {
-    result.push([]);
-    for (let j = 0; j < 3; j++) {
-      let num = Math.floor(Math.random() * 4) + 1;
-      if (result[i].includes(num)) {
-        j--;
-      } else {
-        result[i].push(num);
-      }
-    }
-  }
-
-  level = result;
-
 export default class MemeoryGameScene extends Phaser.Scene{
   constructor(){
     super('memory-game-scene')
