@@ -6,7 +6,7 @@ function shuffle(array) {
   return array;
 }
 
-let array = [[1,0,3],[2,4,1],[3,4,2]];
+let array = [[1,0,3],[2,4,1],[3,4,2],[5,5,0]];
 let level = shuffle(array)
 
 
@@ -37,6 +37,7 @@ export default class MemeoryGameScene extends Phaser.Scene{
     this.load.image('bear','bear.png')
     this.load.image('parrot','parrot.png')
     this.load.image('penguin','penguin.png')
+    this.load.image('ship','ship.png')
     this.load.image('play','play.png')
     this.load.spritesheet('tilesheet','sokoban_tilesheet.png',{frameWidth:64, frameHeight:64})
     this.load.audio('soundChoice','choice.mp3')
@@ -77,7 +78,7 @@ export default class MemeoryGameScene extends Phaser.Scene{
     const width = this.scale.width
     let xPer = .25
     let y = 150
-    for (let row = 0; row < 3; row++) {
+    for (let row = 0; row < 4; row++) {
       for (let col = 0; col < 3; col++) {
         this.group.get(width * xPer,y,'tilesheet',7).setSize(64,32).setOffset(0,32).setData('itemType',level[row][col])
         xPer += .25
@@ -229,6 +230,10 @@ export default class MemeoryGameScene extends Phaser.Scene{
         item = this.itemsGroup.get(box.x,box.y)
         item.setTexture('penguin')
         break;
+      case 5:
+        item = this.itemsGroup.get(box.x,box.y)
+        item.setTexture('ship')
+        break;
     }
 
     if(!item){
@@ -253,10 +258,10 @@ export default class MemeoryGameScene extends Phaser.Scene{
       scale : 1,
       duration : 500,
       onComplete:() => {
-        if(itemType == 0){
-          this.handleBearSelected()
-          return
-        }
+        // if(itemType == 0){
+        //   this.handleBearSelected()
+        //   return
+        // }
         if(this.selectedBox.length < 2){
           return
         }
@@ -322,7 +327,7 @@ export default class MemeoryGameScene extends Phaser.Scene{
       first.box.setFrame(8)
       second.box.setFrame(8)
 
-      if(this.matchesCount >= 4){
+      if(this.matchesCount >= 6){
         this.player.active = false
         this.player.setVelocity(0,0)
         window.location.reload()
