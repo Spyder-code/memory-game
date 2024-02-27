@@ -1,4 +1,14 @@
-let level = [[1,0,3],[2,4,1],[3,4,2]]
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+let array = [[1,0,3],[2,4,1],[3,4,2]];
+let level = shuffle(array)
+
 
 export default class MemeoryGameScene extends Phaser.Scene{
   constructor(){
@@ -13,6 +23,8 @@ export default class MemeoryGameScene extends Phaser.Scene{
     this.cursors = this.input.keyboard.createCursorKeys()
     this.activeBox = undefined
     this.itemsGroup = undefined
+    this.selectedBox = []
+    this.matchesCount = 0
   }
 
   preload(){
@@ -43,6 +55,9 @@ export default class MemeoryGameScene extends Phaser.Scene{
 
     this.children.each(c => {
       const child = c
+      if(child.getData('sorted')){
+        return
+      }
       child.setDepth(child.y)
     })
 
@@ -209,5 +224,96 @@ export default class MemeoryGameScene extends Phaser.Scene{
     }
 
     box.setData('opened',true)
+
+    item.setData('sorted',true)
+    item.setDepth(2000)
+    item.setActive(true)
+    item.setVisible(true)
+
+    item.scale = 0
+    item.alpha = 0
+
+    this.tweens.add({
+      targets : item,
+      y : '-=50',
+      alpha : 1,
+      scale : 1,
+      duration : 500,
+      onComplete:() => {
+        if(itemType == 0){
+          this.handleBearSelected()
+          return
+        }
+        if(this.selectedBox.length < 2){
+          return
+        }
+
+        this.checkForMatch()
+      }
+    })
+
+    this.selectedBox.push({box,item})
+  }
+
+  handleBearSelected(){
+    const { box, item } = this.selectedBox.pop()
+    item.setTint(0xff0000)
+    box.setFrame(20)
+
+    this.player.active = false
+    this.player.setVelocity(0,0)
+
+    this.time.delayedCall(1000, ()=>{
+      item.setTint(0xffffff)
+      box.setFrame(7)
+      box.setData('opened',false)
+
+      this.tweens.add({
+        targets: item,
+        y: '+=50',
+        alpha: 0,
+        scale: 0,
+        duration: 300,
+        onComplete: () =>{
+          this.player.active = true
+        }
+      })
+    })
+  }
+
+  checkForMatch(){
+    const second = this.selectedBox.pop()
+    const first = this.selectedBox.pop()
+    if(first.item.texture != second.item.texture){
+      this.tweens.add({
+        targets: [first.item, second.item],
+        y: '+=50',
+        alpha: 0,
+        scale: 0,
+        duration: 300,
+        delay:1000,
+        onComplete: () =>{
+          this.itemsGroup.killAndHide(first.item)
+          this.itemsGroup.killAndHide(second.item)
+
+          first.box.setData('opened', false)
+          second.box.setData('opened', false)
+        }
+      })
+      return
+    }
+    
+    this.time.delayedCall(1000, () => {
+      first.box.setFrame(8)
+      second.box.setFrame(8)
+
+      if(this.matchesCount >= 4){
+        this.player.active = false
+        this.player.setVelocity(0,0)
+      }
+    })
+
+    this.matchesCount++
+
   }
 }
