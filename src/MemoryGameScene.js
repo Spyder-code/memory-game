@@ -25,6 +25,9 @@ export default class MemeoryGameScene extends Phaser.Scene{
     this.itemsGroup = undefined
     this.selectedBox = []
     this.matchesCount = 0
+    this.soundChoice = undefined
+    this.soundCorrect = undefined
+    this.soundIncorrect = undefined
   }
 
   preload(){
@@ -36,9 +39,15 @@ export default class MemeoryGameScene extends Phaser.Scene{
     this.load.image('penguin','penguin.png')
     this.load.image('play','play.png')
     this.load.spritesheet('tilesheet','sokoban_tilesheet.png',{frameWidth:64, frameHeight:64})
+    this.load.audio('soundChoice','choice.mp3')
+    this.load.audio('soundCorrect','false.mp3')
+    this.load.audio('soundIncorrect','true.mp3')
   }
 
   create(){
+    this.soundChoice = this.sound.add('soundChoice', {volume:0.5})
+    this.soundCorrect = this.sound.add('soundCorrect', {volume:0.5})
+    this.soundIncorrect = this.sound.add('soundIncorrect', {volume:0.5})
     this.add.image(this.halfWidth, 150,'bg').setScale(3)
 
     this.group = this.physics.add.staticGroup()
@@ -130,6 +139,9 @@ export default class MemeoryGameScene extends Phaser.Scene{
   }
 
   movePlayer(){
+    if(!this.player.active){
+      return
+    }
     const speed = 200
     if(this.cursors.left.isDown){
       this.player.setVelocity(-speed,0)
@@ -233,6 +245,7 @@ export default class MemeoryGameScene extends Phaser.Scene{
     item.scale = 0
     item.alpha = 0
 
+    this.soundChoice.play()
     this.tweens.add({
       targets : item,
       y : '-=50',
@@ -285,6 +298,7 @@ export default class MemeoryGameScene extends Phaser.Scene{
     const second = this.selectedBox.pop()
     const first = this.selectedBox.pop()
     if(first.item.texture != second.item.texture){
+      this.soundIncorrect.play()
       this.tweens.add({
         targets: [first.item, second.item],
         y: '+=50',
@@ -302,7 +316,8 @@ export default class MemeoryGameScene extends Phaser.Scene{
       })
       return
     }
-    
+
+    this.soundCorrect.play()
     this.time.delayedCall(1000, () => {
       first.box.setFrame(8)
       second.box.setFrame(8)
@@ -310,6 +325,7 @@ export default class MemeoryGameScene extends Phaser.Scene{
       if(this.matchesCount >= 4){
         this.player.active = false
         this.player.setVelocity(0,0)
+        window.location.reload()
       }
     })
 
