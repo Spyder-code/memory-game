@@ -28,6 +28,9 @@ export default class MemeoryGameScene extends Phaser.Scene{
     this.soundChoice = undefined
     this.soundCorrect = undefined
     this.soundIncorrect = undefined
+    this.timerLabel = undefined
+    this.countDownTimer = 60
+    this.timeEvent = undefined
   }
 
   preload(){
@@ -58,6 +61,15 @@ export default class MemeoryGameScene extends Phaser.Scene{
     this.physics.add.collider(this.player,this.group,this.handlePlayerBoxCollide,null,this)
     this.itemsGroup = this.add.group()
 
+    this.timerLabel = this.add.text(0, this.halfHeight + 250,null).setDepth(100)
+    this.timeEvent = this.time.addEvent({
+      delay: 1000,
+      callback: this.gameOver,
+      callbackScope: this,
+      loop: true
+    })
+    
+    this.cursors = this.input.keyboard.createCursorKeys()
   }
 
   update(){
@@ -330,11 +342,28 @@ export default class MemeoryGameScene extends Phaser.Scene{
       if(this.matchesCount >= 6){
         this.player.active = false
         this.player.setVelocity(0,0)
-        window.location.reload()
+        this.scene.start('win-scene')
+        // window.location.reload()
       }
     })
 
     this.matchesCount++
 
+  }
+
+  gameOver(){
+    this.countDownTimer -= 1
+    this.timerLabel.setStyle({
+      fontSize: 60,
+      fontStyle: 'bold',
+      align: 'center',
+    }).setText(`${this.countDownTimer}`)
+    if(this.countDownTimer <= 0){
+      this.add.text(this.halfWidth, this.halfHeight + 250, 'You Loose!', {fontSize:60}).setOrigin(.5)
+      this.countDownTimer = undefined
+      this.player.active = false
+      this.player.setVelocity(0,0)
+      this.scene.start('game-over-scene')
+    }
   }
 }

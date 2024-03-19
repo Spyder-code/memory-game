@@ -1,5 +1,7 @@
 import Phaser from 'phaser'
 import MemeoryGameScene from './MemoryGameScene'
+import GameOverScene from './GameOverScene'
+import WinScene from './WinScene'
 
 const config = {
 	type: Phaser.AUTO,
@@ -13,7 +15,7 @@ const config = {
 			gravity: { y: 0 },
 		},
 	},
-	scene: [MemeoryGameScene],
+	scene: [MemeoryGameScene, GameOverScene, WinScene],
 	scale:{
 		mode: Phaser.Scale.FIT,
 		autoeCenter: Phaser.Scale.CENTER_BOTH
